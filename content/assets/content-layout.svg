@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 260" font-family="JetBrains Mono, monospace" font-size="14">
+  <rect width="640" height="260" fill="#0c0c0d"/>
+  <g fill="#111113" stroke="#e8e6e3">
+    <rect x="45" y="45" width="230" height="170" stroke-width="1"/>
+    <rect x="40" y="40" width="230" height="170" stroke-width="1"/>
+    <rect x="375" y="45" width="230" height="170"/>
+    <rect x="370" y="40" width="230" height="170"/>
+  </g>
+  <g fill="#e8e6e3">
+    <text x="60" y="72" font-weight="700">content/</text>
+    <text x="76" y="102">about.md</text>
+    <text x="76" y="128" fill="#b4a7ff">writeups/</text>
+    <text x="92" y="152">some-post.md</text>
+    <text x="76" y="178" fill="#b4a7ff">assets/</text>
+    <text x="390" y="72" font-weight="700">site</text>
+    <text x="406" y="102">/about/</text>
+    <text x="406" y="128" fill="#b4a7ff">/writeups/</text>
+    <text x="422" y="152">some-post/</text>
+    <text x="406" y="178" fill="#b4a7ff">/assets/</text>
+  </g>
+  <path d="M290 125h62m-8-6 8 6-8 6" stroke="#b4a7ff" fill="none" stroke-width="1.5"/>
+</svg>

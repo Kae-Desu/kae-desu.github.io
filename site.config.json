@@ -1,0 +1,12 @@
+{
+  "title": "kae-desu",
+  "description": "Write-ups and notes on technical stuff.",
+  "author": "Kaede",
+  "url": "https://kae-desu.github.io",
+  "lang": "en",
+  "perPage": 10,
+  "sections": {
+    "writeups": { "title": "Write-ups", "description": "Long-form technical write-ups.", "order": 1 },
+    "notes": { "title": "Notes", "description": "Shorter things worth sharing.", "order": 2 }
+  }
+}
