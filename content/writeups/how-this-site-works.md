@@ -17,7 +17,20 @@ This site is built from a folder of Markdown notes that doubles as an [Obsidian]
 | `content/<page>.md` | a standalone page at `/<page>/`, linked in the menu |
 | `content/assets/diagram.png` (any non-note file) | copied as-is to `/assets/diagram.png` |
 
-Each top-level folder is a **section** and shows up in the menu. Section titles and descriptions live in `site.config.json`. Folders starting with `.` or `_` (like `.obsidian` or `_templates`) are skipped.
+Each top-level folder is a **section** and shows up in the menu. Files and folders starting with `.` or `_` (like `.obsidian` or `_templates`) are skipped, with one exception below.
+
+### Section settings
+
+Put a `_section.md` in a section folder to control how it appears:
+
+```yaml
+---
+title: Write-ups                        # menu + page heading (defaults to the folder name)
+description: Long-form technical write-ups.   # the line under the heading
+order: 1                                # menu position, lowest first
+---
+Anything written here shows as an intro on the section page.
+```
 
 ## Frontmatter
 

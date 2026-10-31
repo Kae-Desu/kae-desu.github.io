@@ -12,7 +12,8 @@
   --code-bg: #161618;
   --offset: 5px;
 
-  --font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* DotGothic16 is loaded as a tiny subset holding only the kanji in the site title/author. */
+  --font: "JetBrains Mono", "DotGothic16", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --column: 640px;
   --article: 760px;
 
@@ -99,10 +100,11 @@ a:hover {
 
 .site-title {
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   text-decoration: none;
-  font-size: 14px;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  margin-right: auto;
 }
 
 #site-nav ul {
@@ -120,6 +122,19 @@ a:hover {
 #site-nav a[aria-current="page"] {
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+.search-toggle {
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--fg);
+  cursor: pointer;
+}
+.search-toggle:hover {
+  color: var(--accent);
 }
 
 .menu-toggle {
@@ -186,9 +201,16 @@ main {
   margin: 0;
   font-size: 22px;
 }
-.list-header p {
+.list-header > p {
   margin: 4px 0 0;
   color: var(--muted);
+}
+.list-intro {
+  margin-top: 20px;
+  font-size: 14px;
+}
+.list-intro > :last-child {
+  margin-bottom: 0;
 }
 
 /* --- cards ----------------------------------------------------------------- */
@@ -632,6 +654,150 @@ details[open] > summary.callout-title::after {
 }
 .callout:is([data-callout="danger"], [data-callout="error"], [data-callout="bug"], [data-callout="failure"], [data-callout="fail"]) {
   --c: #f08c8c;
+}
+
+/* --- search ------------------------------------------------------------------ */
+
+dialog.search {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 96px);
+  margin: 72px auto auto;
+  overflow: visible;
+}
+dialog.search::backdrop {
+  background: rgb(0 0 0 / 0.72);
+}
+.search-inner {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 110px);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.search-bar svg {
+  flex: none;
+  color: var(--muted);
+}
+.search-bar input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  outline: 0;
+  color: var(--fg);
+  font: 400 16px var(--font);
+}
+.search-bar input::placeholder {
+  color: var(--muted);
+}
+.search-bar input::-webkit-search-cancel-button {
+  display: none;
+}
+kbd {
+  font: 500 11px var(--font);
+  color: var(--muted);
+  border: 1px solid var(--line-soft);
+  padding: 1px 6px;
+}
+
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1px dashed var(--line-soft);
+}
+.search-filters:empty {
+  display: none;
+}
+.chip {
+  font: 400 12px var(--font);
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line-soft);
+  padding: 2px 10px;
+  cursor: pointer;
+}
+.chip:hover {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+.chip[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--fg);
+  border-color: var(--fg);
+}
+
+.search-results {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+}
+.search-results:empty {
+  display: none;
+}
+.search-results a {
+  display: block;
+  padding: 10px 12px;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.search-results a[aria-selected="true"],
+.search-results a:hover {
+  border-color: var(--line);
+  color: inherit;
+}
+.result-meta {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.result-title {
+  display: block;
+  font-weight: 700;
+  margin: 2px 0 4px;
+}
+.result-excerpt {
+  display: block;
+  font-size: 13px;
+  color: #c9c7c3;
+  line-height: 1.6;
+}
+.result-excerpt mark {
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.search-status {
+  margin: 0;
+  padding: 10px 18px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px dashed var(--line-soft);
+}
+.search-status:empty {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  dialog.search {
+    margin-top: 16px;
+  }
 }
 
 /* --- footer ------------------------------------------------------------------ */

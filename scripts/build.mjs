@@ -2,9 +2,10 @@
 //
 //   content/<section>/<note>.md   -> post, listed on the home page and under /<section>/
 //   content/<page>.md             -> standalone page at /<page>/, linked in the nav
+//   content/<section>/_section.md -> section settings (title, description, order) + intro text
 //   anything else (images, pdfs)  -> copied to the same path, e.g. content/assets/x.png -> /assets/x.png
 //
-// Folders starting with "." or "_" (e.g. .obsidian, _templates) are ignored.
+// Files and folders starting with "." or "_" (e.g. .obsidian, _templates) are otherwise ignored.
 
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -14,6 +15,7 @@ import matter from "gray-matter";
 import { Marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
+import * as pagefind from "pagefind";
 import * as T from "./templates.mjs";
 
 const { slugify } = T;
@@ -329,17 +331,24 @@ export async function build() {
   const posts = notes.filter((n) => n.kind === "post").sort((a, b) => b.date - a.date);
   const pages = notes.filter((n) => n.kind === "page").sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
-  const sectionMeta = config.sections ?? {};
-  const sections = [...new Set(posts.map((p) => p.section))]
-    .map((key) => ({
+  const sections = [];
+  for (const key of new Set(posts.map((p) => p.section))) {
+    const rel = `${key}/_section.md`;
+    const raw = await fs.readFile(path.join(CONTENT, rel), "utf8").catch(() => null);
+    const { data, content } = raw ? matter(raw) : { data: {}, content: "" };
+    current = { source: rel, dir: key, inlineTags: new Set() };
+    sections.push({
       key,
       slug: slugify(key),
-      title: sectionMeta[key]?.title ?? titleCase(key),
-      description: sectionMeta[key]?.description ?? "",
-      order: sectionMeta[key]?.order ?? 0,
+      title: String(data.title ?? titleCase(key)),
+      description: String(data.description ?? ""),
+      introHtml: content.trim() ? marked.parse(stripComments(content)) : "",
+      order: Number(data.order ?? 0),
       posts: posts.filter((p) => p.section === key),
-    }))
-    .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+    });
+  }
+  current = null;
+  sections.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
   const sectionByKey = Object.fromEntries(sections.map((s) => [s.key, s]));
   for (const p of posts) p.sectionInfo = sectionByKey[p.section];
 
@@ -383,7 +392,7 @@ export async function build() {
   await paginate(posts, "/", (items, pager, url) => T.listPage(site, { url, items, pager }));
   for (const s of sections) {
     await paginate(s.posts, `/${s.slug}/`, (items, pager, url) =>
-      T.listPage(site, { url, items, pager, heading: s.title, intro: s.description }),
+      T.listPage(site, { url, items, pager, heading: s.title, intro: s.description, introHtml: s.introHtml }),
     );
   }
   for (const t of tags) {
@@ -406,6 +415,12 @@ export async function build() {
     await fs.copyFile(path.join(CONTENT, rel), dest);
   }
   await fs.writeFile(path.join(OUT, ".nojekyll"), "");
+
+  // Full-text search index. Only elements marked data-pagefind-body (posts and pages) get indexed.
+  const { index } = await pagefind.createIndex({ excludeSelectors: [".anchor", ".copy"] });
+  await index.addDirectory({ path: OUT });
+  await index.writeFiles({ outputPath: path.join(OUT, "pagefind") });
+  await pagefind.close();
 
   const ms = Math.round(performance.now() - started);
   console.log(`Built ${posts.length} posts, ${pages.length} pages, ${sections.length} sections, ${tags.length} tags, ${assets.length} assets in ${ms}ms`);

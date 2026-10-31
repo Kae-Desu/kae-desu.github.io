@@ -13,6 +13,7 @@
     "gray-matter": "4.0.3",
     "highlight.js": "11.12.0",
     "marked": "18.1.0",
-    "marked-highlight": "2.2.4"
+    "marked-highlight": "2.2.4",
+    "pagefind": "1.5.2"
   }
 }

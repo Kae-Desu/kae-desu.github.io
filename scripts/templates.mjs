@@ -41,6 +41,7 @@ ${ogImage ? `<meta property="og:image" content="${esc(new URL(ogImage, site.url)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&text=${encodeURIComponent(site.title + site.author)}&display=swap">
 <link rel="stylesheet" href="/style.css">
 <script src="/main.js" defer></script>
 </head>
@@ -48,11 +49,26 @@ ${ogImage ? `<meta property="og:image" content="${esc(new URL(ogImage, site.url)
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header box">
   <a class="site-title" href="/">${esc(site.title)}</a>
+  <nav id="site-nav" aria-label="Main"><ul>${nav}</ul></nav>
+  <button class="search-toggle" type="button" aria-label="Search (press /)" title="Search (/)">
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.2 10.2 15 15" stroke="currentColor" stroke-width="1.6"/></svg>
+  </button>
   <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
-  <nav id="site-nav" aria-label="Main"><ul>${nav}</ul></nav>
 </header>
+<dialog class="search" aria-label="Search">
+  <div class="search-inner box">
+    <div class="search-bar">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.2 10.2 15 15" stroke="currentColor" stroke-width="1.6"/></svg>
+      <input type="search" placeholder="Search posts…" autocomplete="off" spellcheck="false" aria-label="Search posts" aria-controls="search-results">
+      <kbd>esc</kbd>
+    </div>
+    <div class="search-filters"></div>
+    <ol class="search-results" id="search-results" role="listbox"></ol>
+    <p class="search-status" aria-live="polite"></p>
+  </div>
+</dialog>
 <main id="main">
 ${body}
 </main>
@@ -67,7 +83,7 @@ ${body}
 }
 
 const tagLinks = (tags) =>
-  tags.length ? `<p class="tags">${tags.map((t) => `<a href="/tags/${slugify(t)}/">#${esc(t)}</a>`).join(", ")}</p>` : "";
+  tags.length ? `<p class="tags">${tags.map((t) => `<a href="/tags/${slugify(t)}/" data-pagefind-filter="tag:${esc(t)}">#${esc(t)}</a>`).join(", ")}</p>` : "";
 
 function card(p) {
   return `<article class="card box">
@@ -89,13 +105,15 @@ function pagerHtml(pager) {
 </nav>`;
 }
 
-export function listPage(site, { url, items, pager, heading, intro }) {
+export function listPage(site, { url, items, pager, heading, intro, introHtml }) {
+  const prose = introHtml && pager.current === 1 ? `<div class="prose list-intro">${introHtml}</div>` : "";
   const head = heading
-    ? `<header class="list-header"><h1>${esc(heading)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</header>`
+    ? `<header class="list-header"><h1>${esc(heading)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}${prose}</header>`
     : "";
   const body = items.length ? items.map(card).join("\n") : `<p class="empty box">Nothing here yet.</p>`;
   return layout(site, {
     title: heading ?? null,
+    description: intro || undefined,
     url,
     body: `<div class="column">${head}${body}${pagerHtml(pager)}</div>`,
   });
@@ -110,15 +128,15 @@ export function postPage(site, p, { newer, older }) {
     description: p.excerpt,
     url: p.url,
     ogImage: p.coverUrl,
-    body: `<article class="post box">
+    body: `<article class="post box" data-pagefind-body data-pagefind-meta="date:${fmtDate(p.date)}">
   <header class="post-header">
-    <p class="date"><time datetime="${isoDate(p.date)}">${fmtDate(p.date)}</time>${updated} · ${p.readingMinutes} min read</p>
+    <p class="date" data-pagefind-ignore><time datetime="${isoDate(p.date)}">${fmtDate(p.date)}</time>${updated} · ${p.readingMinutes} min read</p>
     <h1>${esc(p.title)}</h1>
   </header>
   ${p.coverUrl ? `<img class="post-cover" src="${esc(p.coverUrl)}" alt="">` : ""}
   <div class="prose">${p.html}</div>
   <footer class="post-footer">
-    <p class="category"><a href="/${p.sectionInfo.slug}/">${esc(p.sectionInfo.title)}</a></p>
+    <p class="category"><a href="/${p.sectionInfo.slug}/" data-pagefind-filter="section">${esc(p.sectionInfo.title)}</a></p>
     ${tagLinks(p.tags)}
   </footer>
 </article>
@@ -131,7 +149,7 @@ export function pagePage(site, p) {
     title: p.title,
     description: p.excerpt,
     url: p.url,
-    body: `<article class="post box">
+    body: `<article class="post box" data-pagefind-body>
   <header class="post-header"><h1>${esc(p.title)}</h1></header>
   <div class="prose">${p.html}</div>
 </article>`,
